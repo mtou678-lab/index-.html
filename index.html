@@ -118,27 +118,35 @@
     let walletAddress = null;
     let health = 100; let armor = 100; let heat = 10; let totalBurned = 145230;
 
-    // دالة الاتصال بالمحفظة على الهاتف
+    // دالة الاتصال الصارمة - تعمل مع Trust Wallet و MetaMask وأي محفظة
     async function connectWallet() {
         if (window.ethereum) {
             try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const accounts = await provider.send("eth_requestAccounts", []);
+                // طلب فتح المحفظة بشكل إجباري
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 walletAddress = accounts[0];
+                
                 document.getElementById("connectWalletBtn").innerText = `✅ الهوية مشفرة: ${walletAddress.substring(0, 10)}...`;
+                document.getElementById("connectWalletBtn").style.background = "#00876c";
                 document.getElementById("statusBox").innerText = `🔗 تم ربط المحفظة الحية بنجاح على البلوكشين.`;
+                
+                // بدء اللعبة تلقائياً بعد نجاح الاتصال الحقيقي
+                enterHub('PVE'); 
             } catch (e) {
                 alert("تم رفض التوقيع وتفعيل المحفظة.");
             }
         } else {
-            walletAddress = "0xDemoModeActive";
-            document.getElementById("connectWalletBtn").innerText = `✅ نمط التجربة مفعّل`;
-            document.getElementById("statusBox").innerText = `⚠️ لم يتم رصد محفظة Web3، تم فتح نمط المعاينة التكتيكي لمحاكاة الأزرار.`;
+            // منع المحاكاة تماماً وتنبيه المستخدم
+            alert("⚠️ لم يتم رصد أي محفظة مشفرة! يرجى فتح هذا الرابط من داخل متصفح (Browser) تطبيق Trust Wallet أو MetaMask.");
         }
     }
 
     function enterHub(mode) {
-        if (!walletAddress) { alert("يجب ربط المحفظة لتشفير هويتك الرقمية أولاً!"); return; }
+        if (!walletAddress) { 
+            alert("يجب ربط المحفظة لتشفير هويتك الرقمية أولاً!"); 
+            return; 
+        }
         document.getElementById("startScreen").classList.add("hidden");
         document.getElementById("syndicateHubScreen").classList.remove("hidden");
         if(mode === "PVP") {
@@ -152,55 +160,55 @@
 
     // شراء أدرينالين أو دخان حقيقي من محفظة الهاتف
     async function triggerSurvivalContract(itemType) {
-        if (window.ethereum && walletAddress !== "0xDemoModeActive") {
-            try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const signer = provider.getSigner();
-                const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-                document.getElementById("statusBox").innerText = "⏳ بانتظار توقيع المعاملة وخصم الرسوم من محفظتك...";
-                
-                const tx = await contract.buySurvivalItem(itemType);
-                await tx.wait();
+        if (!window.ethereum || !walletAddress) {
+            alert("المحفظة غير متصلة!");
+            return;
+        }
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+            document.getElementById("statusBox").innerText = "⏳ بانتظار توقيع المعاملة وخصم الرسوم من محفظتك...";
+            
+            const tx = await contract.buySurvivalItem(itemType);
+            await tx.wait();
 
-                if (itemType === 1) {
-                    health = Math.min(health + 30, 100); totalBurned += 500;
-                    document.getElementById("statusBox").innerText = "💉 تم تأكيد المعاملة! حقنت الأدرينالين وتجددت صحتك الحيوية بعد حرق 500 $SINU.";
-                } else {
-                    heat = Math.max(heat - 40, 10); totalBurned += 300;
-                    document.getElementById("statusBox").innerText = "💨 تم تأكيد المعاملة! فجّرت قنبلة الدخان لتضليل الرادارات وحرق 300 $SINU.";
-                }
-                updateBars();
-            } catch (err) { document.getElementById("statusBox").innerText = `❌ فشلت العملية: ${err.message || err}`; }
-        } else {
-            if (itemType === 1) { health = Math.min(health + 30, 100); } else { heat = Math.max(heat - 40, 10); }
-            document.getElementById("statusBox").innerText = `💉 [نمط معاينة] تم تجديد المؤشرات الحيوية للواجهة محلياً.`;
+            if (itemType === 1) {
+                health = Math.min(health + 30, 100); totalBurned += 500;
+                document.getElementById("statusBox").innerText = "💉 تم تأكيد المعاملة! حقنت الأدرينالين وتجددت صحتك الحيوية بعد حرق 500 $SINU.";
+            } else {
+                heat = Math.max(heat - 40, 10); totalBurned += 300;
+                document.getElementById("statusBox").innerText = "💨 تم تأكيد المعاملة! فجّرت قنبلة الدخان لتضليل الرادارات وحرق 300 $SINU.";
+            }
             updateBars();
+        } catch (err) { 
+            document.getElementById("statusBox").innerText = `❌ فشلت العملية: ${err.message || err}`; 
         }
     }
 
     // تنفيذ طلقة القطار وحرق 5,000 توكن حقيقي على الشبكة
     async function executeLiveAssassination() {
+        if (!window.ethereum || !walletAddress) {
+            alert("المحفظة غير متصلة!");
+            return;
+        }
         document.getElementById("screenImg").src = "https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=600&q=80";
         document.getElementById("overlayLabel").innerText = "موقع الحدث: محطة القطار السريع - لحظة اختراق رصاصة القناص للهدف";
 
-        if (window.ethereum && walletAddress !== "0xDemoModeActive") {
-            try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const signer = provider.getSigner();
-                const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-                document.getElementById("statusBox").innerText = "⏳ طلقة القناص جاهزة. يرجى تأكيد المعاملة لتنفيذ أمر الحرق الكلي لـ 5,000 توكن...";
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+            document.getElementById("statusBox").innerText = "⏳ طلقة القناص جاهزة. يرجى تأكيد المعاملة لتنفيذ أمر الحرق الكلي لـ 5,000 توكن...";
 
-                const tx = await contract.executePveAssassination();
-                await tx.wait();
+            const tx = await contract.executePveAssassination();
+            await tx.wait();
 
-                totalBurned += 5000; heat = Math.min(heat + 30, 100); armor = Math.max(armor - 25, 0);
-                document.getElementById("statusBox").innerText = "🎯 تم تأكيد المعاملة بنجاح! قنص القاتل الأول الهدف وتم تدمير 5,000 $SINU نهائياً!";
-                updateBars();
-            } catch (err) { document.getElementById("statusBox").innerText = `❌ تم إلغاء الأمر أو رفض التوقيع: ${err.message || err}`; }
-        } else {
-            totalBurned += 5000; heat = Math.min(heat + 30, 100);
-            document.getElementById("statusBox").innerText = "🚊 [نمط معاينة] انطلقت الرصاصة الافتراضية؛ وتم إضافة 5,000 توكن لعداد الحرق لتجربة الواجهة.";
+            totalBurned += 5000; heat = Math.min(heat + 30, 100); armor = Math.max(armor - 25, 0);
+            document.getElementById("statusBox").innerText = "🎯 تم تأكيد المعاملة بنجاح! قنص القاتل الأول الهدف وتم تدمير 5,000 $SINU نهائياً!";
             updateBars();
+        } catch (err) { 
+            document.getElementById("statusBox").innerText = `❌ تم إلغاء الأمر أو رفض التوقيع: ${err.message || err}`; 
         }
     }
 
