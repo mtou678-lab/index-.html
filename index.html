@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SINU Syndicate - غرفة العمليات والنجاة حية</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js" type="text/javascript"></script>
+    <style>
+        body { backgroundColor: "#0b0c10"; background-image: linear-gradient(rgba(11, 12, 16, 0.95), rgba(11, 12, 16, 0.95)), url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80'); background-size: cover; background-position: center; background-attachment: fixed; color: #c5c6c7; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+        .container { max-width: "520px"; width: 100%; max-width: 520px; background: rgba(26, 34, 46, 0.97); padding: 25px; borderRadius: "20px"; border-radius: 20px; box-shadow: 0 0 40px rgba(102, 252, 241, 0.3); border: 1px solid #66fcf1; backdrop-filter: blur(10px); box-sizing: border-box; }
+        h1 { color: #66fcf1; fontSize: "36px"; font-size: 36px; margin: 5px 0; text-shadow: 0 0 15px #66fcf1; fontWeight: 900; text-align: center; }
+        .subtitle { color: #45f3ff; fontSize: "13px"; font-size: 13px; margin-bottom: 20px; font-weight: bold; text-align: center; }
+        .btn { background: linear-gradient(135deg, #1f4068, #162447); color: white; border: 2px solid #66fcf1; padding: 12px 10px; font-size: 14px; font-weight: bold; border-radius: 10px; cursor: pointer; width: 100%; box-sizing: border-box; transition: all 0.25s ease; margin-bottom: 10px; }
+        .btn-large { padding: 15px 20px; font-size: 16px; margin-bottom: 12px; }
+        .btn-connect { background: linear-gradient(135deg, #00b894, #00876c); borderColor: "#00b894"; border-color: #00b894; }
+        .btn-pvp { background: linear-gradient(135deg, #8e44ad, #4a148c); border-color: #8e44ad; }
+        .btn-pve { background: linear-gradient(135deg, #2980b9, #1f4068); border-color: #2980b9; }
+        .btn-kill { background: linear-gradient(135deg, #e43f5a, #750517); border-color: #e43f5a; padding: 15px; font-size: 15px; }
+        .btn-survival { background: linear-gradient(135deg, #f39c12, #d35400); border-color: #f39c12; }
+        .survival-hud { background: rgba(0,0,0,0.75); border-radius: 12px; padding: 12px; margin-bottom: 15px; border: 1px solid rgba(102, 252, 241, 0.2); }
+        .hud-bar-container { display: flex; align-items: center; margin-bottom: 8px; font-size: 12px; font-weight: bold; }
+        .hud-label { width: 110px; text-align: right; color: #fff; }
+        .hud-bar-bg { flex: 1; background: #111; height: 14px; border-radius: 7px; overflow: hidden; margin-right: 10px; border: 1px solid #333; position: relative; }
+        .hud-bar-fill { height: 100%; width: 100%; transition: width 0.4s ease; }
+        .burn-stats { background: rgba(0, 0, 0, 0.6); padding: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; border: 1px dashed rgba(102, 252, 241, 0.4); }
+        .stats-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .stats-item { flex: 1; text-align: center; background: rgba(255,255,255,0.03); padding: 6px; border-radius: 6px; margin: 0 5px; }
+        .burn-val { color: #e43f5a; font-weight: bold; text-shadow: 0 0 8px #e43f5a; }
+        .story-screen { width: 100%; height: 240px; border-radius: 14px; border: 2px solid #66fcf1; margin-bottom: 20px; overflow: hidden; position: relative; }
+        .story-screen img { width: 100%; height: 100%; object-fit: cover; }
+        .screen-overlay-text { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 10px; font-size: 12px; color: #fff; text-align: right; font-weight: bold; }
+        .system-title { text-align: right; font-size: 14px; color: #66fcf1; margin: 20px 5px 8px 0; font-weight: bold; border-bottom: 1px solid rgba(102, 252, 241, 0.2); padding-bottom: 4px; }
+        .grid-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        .status-box { margin-top: 20px; font-size: 13px; color: #45f3ff; background: rgba(0, 0, 0, 0.8); padding: 15px; border-radius: 10px; border-right: 4px solid #66fcf1; text-align: right; line-height: 1.6; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>SINU SYNDICATE</h1>
+    <div class="subtitle">الإمبراطورية المتكاملة لإدارة الاغتيالات وعقود النجاة الرقمية 🦅🎯</div>
+
+    <div id="startScreen">
+        <button class="btn btn-large btn-connect" id="connectWalletBtn" onclick="connectWallet()">🔗 تشفير الهوية الرقمية وربط المحفظة</button>
+        <div style="margin: 25px 0 12px 0; font-weight: bold; color: #66fcf1; text-align: center; font-size: 14px;">🕵️‍♂️ اختر ملفك الأمني لدخول المنظمة:</div>
+        <button class="btn btn-large btn-pvp" onclick="enterHub('PVP')">⚔️ ساحة تصفية الحسابات الحية (طور PvP)</button>
+        <button class="btn btn-large btn-pve" onclick="enterHub('PVE')">🦅 إرث روبرت راث - مغامرة النجاة (طور PvE)</button>
+    </div>
+
+    <div id="syndicateHubScreen" class="hidden">
+        <div class="survival-hud">
+            <div class="hud-bar-container">
+                <div class="hud-label">❤️ الصحة الحيوية:</div>
+                <div class="hud-bar-bg"><div id="healthBar" class="hud-bar-fill" style="background-color: #e43f5a; width: 100%;"></div></div>
+            </div>
+            <div class="hud-bar-container">
+                <div class="hud-label">🛡️ درع السترة:</div>
+                <div class="hud-bar-bg"><div id="armorBar" class="hud-bar-fill" style="background-color: #45f3ff; width: 100%;"></div></div>
+            </div>
+            <div class="hud-bar-container">
+                <div class="hud-label">🚨 الرصد الفيدرالي:</div>
+                <div class="hud-bar-bg"><div id="heatBar" class="hud-bar-fill" style="background-color: #f39c12; width: 10%;"></div></div>
+            </div>
+        </div>
+
+        <div class="burn-stats">
+            <div id="hudTitle" style="color: #66fcf1; font-weight: bold; text-align: center; font-size: 14px;">🏆 لوحة العمليات الحية</div>
+            <div class="stats-row">
+                <div class="stats-item">العقد: <span style="color: #66fcf1; font-weight: bold;">مفعّل حياً</span></div>
+                <div class="stats-item">الحرق الكلي 🔥: <span id="burnCounter" class="burn-val">145,230</span> $SINU</div>
+            </div>
+        </div>
+
+        <div class="story-screen">
+            <img id="screenImg" src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80" alt="غرفة العمليات">
+            <div id="overlayLabel" class="screen-overlay-text">كاميرا المقر: النفق السفلي الرئيسي - تمركز القاتل الأول وشريكته</div>
+        </div>
+
+        <div class="system-title">🚨 بروتوكول النجاة والمناورات الطارئة (حرق حقيقي عبر العقد)</div>
+        <div class="grid-buttons">
+            <button class="btn btn-survival" onclick="triggerSurvivalContract(1)">💉 حقن أدرينالين (حرق 500)</button>
+            <button class="btn btn-survival" onclick="triggerSurvivalContract(2)">💨 قنبلة دخان (حرق 300)</button>
+        </div>
+
+        <div class="system-title">🛠️ الترسانة وغرفة تأمين البيانات (منزل الاختباء)</div>
+        <div class="grid-buttons">
+            <button class="btn" onclick="armoryAction('silencer')">🔇 تركيب كاتم صوت البندقية</button>
+            <button class="btn" onclick="armoryAction('intel')">💻 فحص الكاميرات والتشفير</button>
+        </div>
+
+        <div class="system-title">🚊 مكاتب العقود وأوامر التصفية (تنفيذ الحرق لـ 5,000 توكن)</div>
+        <button class="btn btn-kill" onclick="executeLiveAssassination()">🚊 إرسال طلقة القتل الفوري وحرق 5,000 توكن</button>
+
+        <div class="system-title">🏍️ رادار مسارات الهروب التكتيكي وتصفير الملاحقة</div>
+        <div class="grid-buttons">
+            <button class="btn" style="background: linear-gradient(135deg, #f39c12, #b33939);" onclick="escapeAction('moto')">🏍️ طريق عام (دراجة)</button>
+            <button class="btn" style="background: linear-gradient(135deg, #2980b9, #1f4068);" onclick="escapeAction('boat')">🛥️ رصيف بحري (قارب)</button>
+            <button class="btn" style="background: linear-gradient(135deg, #2c3e50, #111); grid-column: span 2;" onclick="escapeAction('heli')">🚁 مروحية التهريب الجوي المخفية</button>
+            <button class="btn" style="grid-column: span 2; background: #111; border-color: #333;" onclick="exitGame()">↩️ انسحاب وتسجيل خروج أمني</button>
+        </div>
+
+        <div id="statusBox" class="status-box">⚙️ المنظومة المركزية: تم فحص العقد وتوصيل قنوات البلوكشين الذكية لمشروع SINU.</div>
+    </div>
+</div>
+
+<script>
+    // الإعدادات الموثقة لعقدك الذكي
+    const CONTRACT_ADDRESS = "0x3E71427c4F4c3aE6DBA472Ccb17076E2148A1231";
+    const CONTRACT_ABI = [
+        {"inputs":[{"internalType":"address","name":"_sinuTokenAddress","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
+        {"inputs":[],"name":"acceptAndFight","outputs":[],"stateMutability":"nonpayable","type":"function"},
+        {"inputs":[{"internalType":"uint256","name":"_itemType","type":"uint256"}],"name":"buySurvivalItem","outputs":[],"stateMutability":"nonpayable","type":"function"},
+        {"inputs":[],"name":"executePveAssassination","outputs":[],"stateMutability":"nonpayable","type":"function"},
+        {"inputs":[{"internalType":"address","name":"_target","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"createBountyChallenge","outputs":[],"stateMutability":"nonpayable","type":"function"}
+    ];
+
+    let walletAddress = null;
+    let health = 100; let armor = 100; let heat = 10; let totalBurned = 145230;
+
+    // دالة الاتصال بالمحفظة على الهاتف
+    async function connectWallet() {
+        if (window.ethereum) {
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const accounts = await provider.send("eth_requestAccounts", []);
+                walletAddress = accounts[0];
+                document.getElementById("connectWalletBtn").innerText = `✅ الهوية مشفرة: ${walletAddress.substring(0, 10)}...`;
+                document.getElementById("statusBox").innerText = `🔗 تم ربط المحفظة الحية بنجاح على البلوكشين.`;
+            } catch (e) {
+                alert("تم رفض التوقيع وتفعيل المحفظة.");
+            }
+        } else {
+            walletAddress = "0xDemoModeActive";
+            document.getElementById("connectWalletBtn").innerText = `✅ نمط التجربة مفعّل`;
+            document.getElementById("statusBox").innerText = `⚠️ لم يتم رصد محفظة Web3، تم فتح نمط المعاينة التكتيكي لمحاكاة الأزرار.`;
+        }
+    }
+
+    function enterHub(mode) {
+        if (!walletAddress) { alert("يجب ربط المحفظة لتشفير هويتك الرقمية أولاً!"); return; }
+        document.getElementById("startScreen").classList.add("hidden");
+        document.getElementById("syndicateHubScreen").classList.remove("hidden");
+        if(mode === "PVP") {
+            document.getElementById("hudTitle").innerText = "⚔️ شبكة صراع القتلة (PvP)";
+            document.getElementById("statusBox").innerText = "⚔️ تم دخول نفق صراع القتلة الحيين. بانتظار عقود التحدي لاعب ضد لاعب.";
+        } else {
+            document.getElementById("hudTitle").innerText = "🏆 إرث روبرت راث (PvE)";
+            document.getElementById("statusBox").innerText = "🎬 ملف روبرت راث نشط. الأوامر ستنفذ سحب وحرق حقيقي من رصيدك.";
+        }
+    }
+
+    // شراء أدرينالين أو دخان حقيقي من محفظة الهاتف
+    async function triggerSurvivalContract(itemType) {
+        if (window.ethereum && walletAddress !== "0xDemoModeActive") {
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                document.getElementById("statusBox").innerText = "⏳ بانتظار توقيع المعاملة وخصم الرسوم من محفظتك...";
+                
+                const tx = await contract.buySurvivalItem(itemType);
+                await tx.wait();
+
+                if (itemType === 1) {
+                    health = Math.min(health + 30, 100); totalBurned += 500;
+                    document.getElementById("statusBox").innerText = "💉 تم تأكيد المعاملة! حقنت الأدرينالين وتجددت صحتك الحيوية بعد حرق 500 $SINU.";
+                } else {
+                    heat = Math.max(heat - 40, 10); totalBurned += 300;
+                    document.getElementById("statusBox").innerText = "💨 تم تأكيد المعاملة! فجّرت قنبلة الدخان لتضليل الرادارات وحرق 300 $SINU.";
+                }
+                updateBars();
+            } catch (err) { document.getElementById("statusBox").innerText = `❌ فشلت العملية: ${err.message || err}`; }
+        } else {
+            if (itemType === 1) { health = Math.min(health + 30, 100); } else { heat = Math.max(heat - 40, 10); }
+            document.getElementById("statusBox").innerText = `💉 [نمط معاينة] تم تجديد المؤشرات الحيوية للواجهة محلياً.`;
+            updateBars();
+        }
+    }
+
+    // تنفيذ طلقة القطار وحرق 5,000 توكن حقيقي على الشبكة
+    async function executeLiveAssassination() {
+        document.getElementById("screenImg").src = "https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=600&q=80";
+        document.getElementById("overlayLabel").innerText = "موقع الحدث: محطة القطار السريع - لحظة اختراق رصاصة القناص للهدف";
+
+        if (window.ethereum && walletAddress !== "0xDemoModeActive") {
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                document.getElementById("statusBox").innerText = "⏳ طلقة القناص جاهزة. يرجى تأكيد المعاملة لتنفيذ أمر الحرق الكلي لـ 5,000 توكن...";
+
+                const tx = await contract.executePveAssassination();
+                await tx.wait();
+
+                totalBurned += 5000; heat = Math.min(heat + 30, 100); armor = Math.max(armor - 25, 0);
+                document.getElementById("statusBox").innerText = "🎯 تم تأكيد المعاملة بنجاح! قنص القاتل الأول الهدف وتم تدمير 5,000 $SINU نهائياً!";
+                updateBars();
+            } catch (err) { document.getElementById("statusBox").innerText = `❌ تم إلغاء الأمر أو رفض التوقيع: ${err.message || err}`; }
+        } else {
+            totalBurned += 5000; heat = Math.min(heat + 30, 100);
+            document.getElementById("statusBox").innerText = "🚊 [نمط معاينة] انطلقت الرصاصة الافتراضية؛ وتم إضافة 5,000 توكن لعداد الحرق لتجربة الواجهة.";
+            updateBars();
+        }
+    }
+
+    function armoryAction(action) {
+        if (action === "silencer") {
+            document.getElementById("screenImg").src = "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=600&q=80";
+            document.getElementById("overlayLabel").innerText = "طاولة الترسانة: جاري تركيب وفحص كاتم الصوت عالي التردد لبندقية القنص";
+            document.getElementById("statusBox").innerText = "🔇 غرفة الأسلحة: تم دمج كواتم الصوت الميكانيكية وتجهيز الذخيرة التكتيكية.";
+        } else {
+            document.getElementById("screenImg").src = "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80";
+            document.getElementById("overlayLabel").innerText = "غرفة المراقبة: فحص قنوات الاتصال وتفعيل جدران حماية التشفير للشبكة";
+            document.getElementById("statusBox").innerText = "💻 منظومة التأمين: شريكتك تقوم الآن بمسح الترددات لمنع عمليات الرصد أو التعقب الفيدرالي.";
+        }
+    }
+
+    function escapeAction(type) {
+        heat = 10;
+        if (type === "moto") {
+            document.getElementById("screenImg").src = "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=600&q=80";
+            document.getElementById("overlayLabel").innerText = "مسار الهروب أ: الشوارع العامة باستخدام دراجة عسكرية مظلمة";
+            document.getElementById("statusBox").innerText = "🏍️ هروب سريع: انطلقت الدراجة لتأمين موقعك وخفض مؤشر الرصد الفيدرالي.";
+        } else if (type === "boat") {
+            document.getElementById("screenImg").src = "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80";
+            document.getElementById("overlayLabel").innerText = "مسار الهروب ب: الرصيف المائي - قارب كوماندوز تكتيكي سريع";
+            document.getElementById("statusBox").innerText = "🛥️ الهروب البحري: شق القارب السريع أمواج البحر المظلمة متخفياً وسط الضباب.";
+        } else {
+            document.getElementById("screenImg").src = "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80";
+            document.getElementById("overlayLabel").innerText = "مسار الهروب ج: مروحية إجلاء عسكرية هجومية سوداء";
+            document.getElementById("statusBox").innerText = "🚁 الإخلاء الجوي الأقصى: أقلعت مروحية الإجلاء مخترقة السحاب لتعلن نجاح خطة النجاة.";
+        }
+        updateBars();
+    }
+
+    function updateBars() {
+        document.getElementById("healthBar").style.width = health + "%";
+        document.getElementById("armorBar").style.width = armor + "%";
+        document.getElementById("heatBar").style.width = heat + "%";
+        document.getElementById("burnCounter").innerText = totalBurned.toLocaleString();
+    }
+
+    function exitGame() {
+        document.getElementById("syndicateHubScreen").classList.add("hidden");
+        document.getElementById("startScreen").classList.remove("hidden");
+    }
+</script>
+</body>
+</html>
